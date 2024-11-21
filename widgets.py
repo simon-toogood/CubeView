@@ -15,25 +15,25 @@ def insert_newlines(string, every=80):
 
 
 class FitsViewer(tk.Frame):
-    def __init__(self, master, hdu, wl, **kwargs):
+    def __init__(self, master, hdu, **kwargs):
         super().__init__(master, **kwargs)
         self.hdu = hdu
-        self.wl = wl
-        if wl is None:
-            self.img = self.hdu.data
-        else:
-            self.img = self.hdu.data[wl]
+        self.cube = True if hdu.header["NAXIS"] == 3 else False
         self.header = ScrolledText(self, width=80, height=32)
         self.header.insert(tk.INSERT, insert_newlines(str(hdu.header)))
         self.header.config(state=tk.DISABLED)
-        self.image = Image(self, self.img)
         self.header.pack(side=tk.RIGHT)
+        if self.cube:
+            self.image = Image3D(self, self.hdu.data)
+        else:
+            self.image = Image2D(self, self.hdu.data)
         self.image.pack(side=tk.LEFT)
 
 
 class Image(tk.Frame):
     def __init__(self, master, img_data, **kwargs):
         super().__init__(master, **kwargs)
+        self.img_data = img_data
         self.fig, self.ax = plt.subplots(1, 1)
         self.ax.set_axis_off()
         self.canvas = FigureCanvasTkAgg(self.fig, master=self)
@@ -41,14 +41,26 @@ class Image(tk.Frame):
         self.toolbar = NavigationToolbar2Tk(self.canvas, self)
         self.toolbar.update()
         self.canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
-        self.update_img(img_data)
 
-    def update_img(self, img_data, **imshow_kwargs):
-        self.img_data = img_data
-        i = self.ax.imshow(img_data, **imshow_kwargs)
-        self.colorbar = plt.colorbar(i, ax=self.ax)
+    def add_colorbar(self):
+        plt.colorbar(self.artist, ax=self.ax)
+
+
+class Image3D(Image):
+    def __init__(self, master, img_data):
+        super().__init__(master, img_data)
+        self.artist = self.ax.imshow(self.img_data[0])
         self.fig.tight_layout()
 
+    def change_wavelength(self, wl):
+        self.artist.set_data(self.img_data[wl])
+        self.canvas.draw()
+
+class Image2D(Image):
+    def __init__(self, master, img_data):
+        super().__init__(master, img_data)
+        self.artist = self.ax.imshow(img_data)
+        self.fig.tight_layout()
 
 class Plot(tk.Frame):
     def __init__(self, master, **kwargs):
