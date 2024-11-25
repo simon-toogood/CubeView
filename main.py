@@ -1,6 +1,7 @@
 import tkinter as tk
 import tkinter.ttk as ttk
 import matplotlib.pyplot as plt
+import matplotlib as mpl
 from astropy.io import fits
 import numpy as np
 
@@ -30,7 +31,6 @@ class CubeView(tk.Frame):
         self.wl_label.grid(row=2, column=0, columnspan=3)
         tk.Label(wl_frame, text=f"{self.max_wl:.3f}um").grid(row=2, column=2)
 
-
     def load_fits(self):
         with fits.open(self.filepath) as hdul:
             self.min_wl = hdul[1].header["WAVSTART"] * 1e6
@@ -55,9 +55,6 @@ class CubeView(tk.Frame):
         for viewer in self.cube_viewers:
             viewer.image.change_wavelength(wl)
 
-    def update_cmap(self, val):
-        print(val)
-
 
 def on_close():
     root.quit()
@@ -66,6 +63,6 @@ def on_close():
 root = tk.Tk()
 root.protocol("WM_DELETE_WINDOW", on_close)
 
-cv = CubeView(root, R"\\uol.le.ac.uk\root\ALICE\data\nemesis\jwst\NIRSPEC_IFU\2022-12-24_JupSPole\2022-07-01_reduction\obs68S\stage4_despike\combined\Level3_0B_g395h-f290lp_s3d_nav.fits")
+cv = CubeView(root, R"\\uol.le.ac.uk\root\staff\home\s\scat2\Desktop Files\Level3_0B_g395h-f290lp_s3d_nav.fits")
 cv.pack()
 root.mainloop()
