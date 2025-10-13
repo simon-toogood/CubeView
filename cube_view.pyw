@@ -259,7 +259,7 @@ class ImageViewer(tk.Frame):
             self.im = self.imax.imshow(self.data, origin="lower")
 
     def _plot_spectrum(self):
-        self.spec, = self.specax.plot(self.wavelengths, np.nanmean(self.data, axis=(1,2)), lw=0.5)
+        self.spec, = self.specax.plot(self.wavelengths, np.nanmean(self.data, axis=(1,2)), lw=0.5, c="k")
         ymin = np.nanpercentile(self.data, 0.1)
         if ymin < 1e0:
             ymin = 1e0
